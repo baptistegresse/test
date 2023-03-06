@@ -6,7 +6,7 @@
 /*   By: bgresse <bgresse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/23 16:02:59 by zrebhi            #+#    #+#             */
-/*   Updated: 2023/03/02 17:45:11 by bgresse          ###   ########.fr       */
+/*   Updated: 2023/03/06 19:42:22 by bgresse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,19 +24,53 @@ void	data_init(int argc, char **argv, char **envp, t_minishell *data)
 	g_status = 0;
 }
 
-static char	*get_prompt(t_env *head, char *key)
-{
-	t_env	*temp;
+// -----------------------------------------------------------------------------------
 
-	temp = head;
-	while (temp)
+char	**ft_refresh_envp(t_env *head)
+{
+	size_t	env_len;
+	char	**env;
+	size_t	i;
+
+	if (!head)
+		return (NULL);
+	env_len = ft_list_size(head);
+	env = malloc(sizeof(char *) * env_len);
+	i = 0;
+	while (head)
 	{
-		if (ft_strcmp(temp->key, key) == 0)
-			return (ft_strjoin(ft_strjoin(""GREEN"➜  "CYAN"", temp->value),
-					""PURPLE"@minishell > "RESET""));
-		temp = temp->next;
+		if (head->equal)
+			env[i] = ft_strjoin(head->key, ft_strjoin("=", head->value));
+		else
+			env[i] = head->key;
+		i++;
+		head = head->next;
 	}
-	return (""GREEN"➜  "CYAN"guest"PURPLE"@minishell > "RESET"");
+	env[i] = NULL;
+	return (env);
+}
+
+// -----------------------------------------------------------------------------------
+
+static char	*get_prompt(t_env **head)
+{
+	char	*user;
+	char	*shlv;
+	int		len_shlvl;
+
+	user = ft_get_env(head, "USER");
+	shlv = ft_get_env(head, "SHLVL");
+
+	len_shlvl = ft_atoi(shlv);
+	shlv = malloc(sizeof(char) * (len_shlvl + 1));
+	shlv[len_shlvl] = 0;
+	while (len_shlvl--)
+		shlv[len_shlvl] = '.';
+	if (!user)
+		user = "guest";
+	
+	return (ft_strjoin(ft_strjoin(""GREEN"➜ ", shlv), ft_strjoin(
+		""CYAN"", ft_strjoin(user, ""PURPLE"@minishell"YELLOW" /ᐠ - ˕ -マ Ⳋ "RESET""))));
 }
 
 void	ft_special_builtins(t_minishell *data);
@@ -47,11 +81,10 @@ void	ft_prompt(t_minishell *data)
 	int			pid;
 	char		*prompt;
 
-	prompt = get_prompt(data->head_env, "USER");
 	while (1)
 	{
-		if (data->paths)
-			data->paths = ft_pathfinder(&data->head_env);
+		data->envp = ft_refresh_envp(data->head_env);
+		prompt = get_prompt(&data->head_env);
 		buffer = readline(prompt);
 		if (!buffer)
 			break ;
@@ -59,7 +92,6 @@ void	ft_prompt(t_minishell *data)
 			continue;
 		add_history(buffer);
 		data->cmds = ft_cmdlist(buffer, data);
-		// ft_print_cmdlist(data->cmds);
 		if (data->cmds)
 		{
 			ft_special_builtins(data);

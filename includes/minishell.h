@@ -70,6 +70,7 @@ char		**ft_expand_path(t_env **head, char **cmds);
 
 t_env		*add_node(t_env *head, char *key, char *value, bool equal);
 char		*ft_get_env(t_env **head_env, char *key);
+int			ft_list_size(t_env *head);
 
 t_cmdlist	*ft_cmdlist(char *cmd_line, t_minishell *data);
 void		ft_print_cmdlist(t_cmdlist *cmds);
@@ -82,9 +83,9 @@ int			ft_error(char **parsed_line, int i);
 
 void	ft_built_in_cd(t_env **head, char **full_cmd);
 void	ft_built_in_exit(t_minishell *data);
-void	ft_built_in_env(t_env **head);
+void	ft_built_in_env(char **envp);
 void	ft_built_in_pwd(void);
 void    ft_built_in_export(t_env **head, char **full_cmd);
-void	ft_built_in_unset(t_env **head, char *key);
+void	ft_built_in_unset(t_env **head, char **key_list);
 
 #endif

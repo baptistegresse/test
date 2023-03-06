@@ -6,7 +6,7 @@
 /*   By: bgresse <bgresse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/09 10:25:25 by bgresse           #+#    #+#             */
-/*   Updated: 2023/01/11 11:50:25 by bgresse          ###   ########.fr       */
+/*   Updated: 2023/03/06 18:37:12 by bgresse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,13 @@ char	*ft_strrchr(const char *s, int c)
 	while (i >= 0)
 	{
 		if (ptr[i] == (char)c)
-			return (&ptr[i]);
+		{
+			if (&ptr[i + 1])
+				return (&ptr[i + 1]);
+			else
+				return &ptr[i];
+		}
 		i--;
 	}
-	return (NULL);
+	return ((char *)s);
 }

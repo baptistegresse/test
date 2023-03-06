@@ -6,49 +6,13 @@
 /*   By: bgresse <bgresse@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/01 15:06:30 by zrebhi            #+#    #+#             */
-/*   Updated: 2023/03/02 17:26:43 by bgresse          ###   ########.fr       */
+/*   Updated: 2023/03/06 17:20:38 by bgresse          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
 int	ft_list_size(t_env *head);
-
-void	ft_set_env(t_env **head, char *key, char *value, bool equal)
-{
-	t_env	*temp;
-
-	temp = *head;
-	while (temp)
-	{
-		if (!ft_strcmp(temp->key, key))
-		{
-			free(temp->value);
-			temp->value = ft_strdup(value);
-			return ;
-		}
-		temp = temp->next;
-	}
-	add_node(*head, key, value, equal);
-}
-
-char	**ft_join_envp(t_env **head)
-{
-	t_env	*current;
-	char	**envp;
-	size_t	i;
-
-	i = 0;
-	current = *head;
-	envp = malloc(sizeof(char *) * ft_list_size(*head));
-	while (current)
-	{
-		envp[i++] = ft_strjoin(current->key, ft_strjoin("=", current->value));
-		current = current->next;
-	}
-	envp[i] = NULL;
-	return (envp);
-}
 
 void	ft_parse_env(t_env **head, char **envp)
 {
@@ -58,13 +22,22 @@ void	ft_parse_env(t_env **head, char **envp)
 	char	*value;
 
 	i = 0;
+	if (!envp[0])
+	{
+		*head = add_node(*head, "_", "/usr/bin/env", true);
+		*head = add_node(*head, "SHLVL", "1", true);
+		*head = add_node(*head, "PWD", getcwd(NULL, 0), true);
+	}
 	while (envp[i])
 	{
 		equal = ft_strchr(envp[i], '=');
 		if (equal)
 		{
 			key = ft_strndup(envp[i], equal - envp[i]);
-			value = ft_strdup(equal + 1);
+			if (ft_strcmp(key, "SHLVL") == 0)
+				value = ft_itoa(ft_atoi(equal + 1) + 1);
+			else
+				value = ft_strdup(equal + 1);
 			*head = add_node(*head, key, value, true);
 			free(key);
 		}
